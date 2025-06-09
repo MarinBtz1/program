@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autovehicule - Chirie Automobile</title>
+    <link rel="stylesheet" href="Autovehicule.css">
+</head>
+<body>
+    <header>
+        <h1>Chirie Automobile</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Acasă</a></li>
+                <li><a href="DespreNoi.html">Despre Noi</a></li>
+                <li><a href="contacte.html">Contact</a></li>
+                <li><a href="servicii.html">Servicii</a></li>
+                <li><a href="Autovehicule.html" class="active">Autovehicule</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="car-list-section">
+        <h2>Flota Noastră</h2>
+
+        <div id="admin-controls" style="text-align:right; margin-bottom:20px; display:none;">
+            <button onclick="openAddCarModal()">Adaugă Mașină</button>
+        </div>
+
+        <div id="carContainer" class="car-grid"></div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Chirie Automobile. Toate drepturile rezervate.</p>
+    </footer>
+
+    <!-- Modal -->
+    <div id="addCarModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
+        <div style="background:white; padding:20px; border-radius:10px; width:90%; max-width:500px;">
+            <h3>Adaugă Mașină</h3>
+            <form id="addCarForm">
+                <input type="text" name="nume" placeholder="Model" required><br><br>
+                <input type="text" name="pret" placeholder="Preț/zi (€)" required><br><br>
+                <input type="text" name="motor" placeholder="Detalii Motor" required><br><br>
+                <input type="text" name="imagine" placeholder="URL imagine" required><br><br>
+                <button type="submit">Salvează</button>
+                <button type="button" onclick="closeAddCarModal()">Anulează</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const isAdmin = true; // Setează pe false pentru utilizatori normali
+
+        window.onload = () => {
+            if (isAdmin) {
+                document.getElementById('admin-controls').style.display = 'block';
+            }
+            loadCars();
+        };
+
+        function openAddCarModal() {
+            document.getElementById('addCarModal').style.display = 'flex';
+        }
+
+        function closeAddCarModal() {
+            document.getElementById('addCarModal').style.display = 'none';
+        }
+
+        function loadCars() {
+            fetch('/api/cars')
+                .then(res => res.json())
+                .then(cars => {
+                    const container = document.getElementById('carContainer');
+                    container.innerHTML = '';
+                    cars.forEach(car => {
+                        container.innerHTML += `
+                        <div class="car-box">
+                            <img src="${car.imagine}" alt="${car.nume}">
+                            <h3>${car.nume}</h3>
+                            <p>${car.pret}€/zi</p>
+                            <p>${car.motor}</p>
+                        </div>`;
+                    });
+                });
+        }
+
+        document.getElementById('addCarForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            fetch('/api/cars', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(response => {
+                alert('Mașina a fost adăugată!');
+                closeAddCarModal();
+                loadCars();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Eroare la salvare.');
+            });
+        });
+    </script>
+</body>
+</html>

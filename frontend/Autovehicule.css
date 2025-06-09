@@ -1,0 +1,109 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #eef2f3;
+    color: #333;
+    margin: 0;
+}
+
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+nav ul {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    margin-top: 15px;
+    padding: 0;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+nav a.active,
+nav a:hover {
+    text-decoration: underline;
+}
+
+.car-list-section {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.car-list-section h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.car-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.car-box {
+    background-color: #ecf0f1;
+    border-radius: 15px;
+    padding: 25px;
+    width: 48%;
+    height: auto;
+    text-align: center;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.car-box:hover {
+    transform: scale(1.03);
+}
+
+.car-box img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.car-box h3 {
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.car-box p {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+footer {
+    background-color: #2c3e50;
+    color: white;
+    text-align: center;
+    padding: 15px 0;
+    margin-top: 40px;
+}
+
+@media (max-width: 768px) {
+    .car-box {
+        width: 100%;
+    }
+
+    nav ul {
+        flex-direction: column;
+    }
+}

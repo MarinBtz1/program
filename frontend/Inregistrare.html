@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Înregistrare</title>
+  <link rel="stylesheet" href="Inregistrare.css">
+  <style>
+    .error {
+      color: red;
+      font-size: 0.9em;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Crează un cont</h2>
+    <form id="inregistrareForm" novalidate>
+      <label for="nume">Nume complet</label>
+      <input type="text" id="nume" name="nume" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+      <div class="error" id="emailError"></div>
+
+      <label for="parola">Parolă</label>
+      <input type="password" id="parola" name="parola" required>
+      <div class="error" id="parolaError"></div>
+
+      <label for="confirmare_parola">Confirmă parola</label>
+      <input type="password" id="confirmare_parola" name="confirmare_parola" required>
+      <div class="error" id="confirmareParolaError"></div>
+
+      <button type="submit">Înregistrează-te</button>
+    </form>
+    <p class="link">Ai deja cont? <a href="Autentificarea.html">Autentifică-te</a></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('inregistrareForm');
+    const email = document.getElementById('email');
+    const parola = document.getElementById('parola');
+    const confirmareParola = document.getElementById('confirmare_parola');
+
+    const emailError = document.getElementById('emailError');
+    const parolaError = document.getElementById('parolaError');
+    const confirmareParolaError = document.getElementById('confirmareParolaError');
+
+    form.addEventListener('submit', function (e) {
+      let valid = true;
+      emailError.textContent = '';
+      parolaError.textContent = '';
+      confirmareParolaError.textContent = '';
+
+      // Validare email
+      if (!email.value.includes('@') || !email.value.includes('.')) {
+        emailError.textContent = 'Introduceți un email valid (ex: exemplu@email.com).';
+        valid = false;
+      }
+
+      // Validare lungime parolă
+      if (parola.value.length < 6) {
+        parolaError.textContent = 'Parola trebuie să aibă cel puțin 6 caractere.';
+        valid = false;
+      }
+
+      // Confirmare parolă
+      if (parola.value !== confirmareParola.value) {
+        confirmareParolaError.textContent = 'Parolele nu coincid.';
+        valid = false;
+      }
+
+      if (!valid) {
+        e.preventDefault(); // oprește trimiterea formularului
+      }
+    });
+  </script>
+</body>
+</html>
+
