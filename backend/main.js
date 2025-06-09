@@ -16,6 +16,7 @@ db.serialize(() => {
     pretPZ REAL,
     detaliiMotor TEXT,
     anul INTEGER,
+    imagine TEXT,
     rezervata INTEGER DEFAULT 0
   )`);
 
