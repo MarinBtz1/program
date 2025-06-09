@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ro">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Autovehicule - Chirie Automobile</title>
     <link rel="stylesheet" href="Autovehicule.css">
 </head>
+
 <body>
     <header>
         <h1>Chirie Automobile</h1>
@@ -13,7 +15,6 @@
             <ul>
                 <li><a href="index.html">Acasă</a></li>
                 <li><a href="DespreNoi.html">Despre Noi</a></li>
-                <li><a href="contacte.html">Contact</a></li>
                 <li><a href="servicii.html">Servicii</a></li>
                 <li><a href="Autovehicule.html" class="active">Autovehicule</a></li>
             </ul>
@@ -43,13 +44,13 @@
                 <input type="text" name="nume" placeholder="Model" required><br><br>
                 <input type="text" name="pret" placeholder="Preț/zi (€)" required><br><br>
                 <input type="text" name="motor" placeholder="Detalii Motor" required><br><br>
+                <input type="text" name="anul" placeholder="Anul fabricarii" required><br><br>
                 <input type="text" name="imagine" placeholder="URL imagine" required><br><br>
                 <button type="submit">Salvează</button>
                 <button type="button" onclick="closeAddCarModal()">Anulează</button>
             </form>
         </div>
     </div>
-
     <script>
         const isAdmin = true; // Setează pe false pentru utilizatori normali
 
@@ -69,7 +70,7 @@
         }
 
         function loadCars() {
-            fetch('/api/cars')
+            fetch('http://localhost:3000/api/masini')
                 .then(res => res.json())
                 .then(cars => {
                     const container = document.getElementById('carContainer');
@@ -77,36 +78,45 @@
                     cars.forEach(car => {
                         container.innerHTML += `
                         <div class="car-box">
-                            <img src="${car.imagine}" alt="${car.nume}">
-                            <h3>${car.nume}</h3>
-                            <p>${car.pret}€/zi</p>
-                            <p>${car.motor}</p>
+                            <img src="${car.imagine || 'https://via.placeholder.com/150'}" alt="${car.model}">
+                            <h3>${car.model} (${car.anul})</h3>
+                            <p>${car.pretPZ}€/zi</p>
+                            <p>${car.detaliiMotor}</p>
                         </div>`;
                     });
-                });
+                })
+                .catch(err => console.error('Eroare la încărcare mașini:', err));
         }
 
         document.getElementById('addCarForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const formData = new FormData(this);
-            const data = Object.fromEntries(formData.entries());
+            const data = {
+                model: formData.get('nume'),
+                pretPZ: parseFloat(formData.get('pret')),
+                detaliiMotor: formData.get('motor'),
+                anul: parseInt(formData.get('anul')),
+                imagine: formData.get('imagine')
+            };
 
-            fetch('/api/cars', {
+            fetch('http://localhost:3000/api/masini', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(res => res.json())
-            .then(response => {
-                alert('Mașina a fost adăugată!');
-                closeAddCarModal();
-                loadCars();
-            })
-            .catch(err => {
-                console.error(err);
-                alert('Eroare la salvare.');
-            });
+                .then(res => res.json())
+                .then(response => {
+                    alert('Mașina a fost adăugată!');
+                    closeAddCarModal();
+                    loadCars();
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Eroare la salvare.');
+                });
         });
     </script>
+
 </body>
+
 </html>
