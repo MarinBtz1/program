@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <title>Profil Utilizator</title>
+  <link rel="stylesheet" href="profil.css">
+</head>
+<body>
+  <header>
+    <h1>Profilul meu</h1>
+  </header>
+
+  <section class="services-section">
+    <div class="profile-container">
+      <div class="profile-image-wrapper">
+        <img src="img/default-profile.png" alt="Poză profil" class="profile-image" id="pozaProfil">
+        <input type="file" id="uploadPoza" accept="image/*">
+      </div>
+
+      <form id="profilForm">
+        <label for="nume">Nume:</label>
+        <input type="text" id="nume" name="nume" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" readonly>
+
+        <label for="parola">Parolă nouă:</label>
+        <input type="password" id="parola" name="parola" placeholder="Lasă necompletat dacă nu vrei să schimbi parola">
+
+        <button type="submit">Salvează modificările</button>
+      </form>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2025 Site-ul tău de închirieri auto
+  </footer>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
+      alert('Nu ești autentificat!');
+      window.location.href = 'Autentificarea.html';
+    }
+
+    document.getElementById('nume').value = user.nume;
+    document.getElementById('email').value = user.email;
+
+    // Dacă avem o poză salvată local
+    const pozaSalvata = localStorage.getItem('pozaProfil');
+    if (pozaSalvata) {
+      document.getElementById('pozaProfil').src = pozaSalvata;
+    }
+
+    // Upload poză și salvare în localStorage
+    document.getElementById('uploadPoza').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          const pozaBase64 = evt.target.result;
+          document.getElementById('pozaProfil').src = pozaBase64;
+          localStorage.setItem('pozaProfil', pozaBase64);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    const form = document.getElementById('profilForm');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nume = document.getElementById('nume').value;
+      const parola = document.getElementById('parola').value;
+
+      let bodyData = { nume };
+      if (parola.length > 0) {
+        bodyData.parola = parola;
+      }
+
+      const response = await fetch(`http://localhost:3000/api/utilizatori/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyData)
+      });
+
+      if (response.ok) {
+        alert('Datele au fost actualizate cu succes!');
+        const updatedUser = { ...user, nume };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      } else {
+        const err = await response.json();
+        alert('Eroare: ' + err.error);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -25,7 +25,7 @@
         <h2>Flota Noastră</h2>
 
         <div id="admin-controls" style="text-align:right; margin-bottom:20px; display:none;">
-            <button onclick="openAddCarModal()">Adaugă Mașină</button>
+            <button id="openModalBtn">Adaugă Mașină</button>
         </div>
 
         <div id="carContainer" class="car-grid"></div>
@@ -36,86 +36,214 @@
     </footer>
 
     <!-- Modal -->
-    <div id="addCarModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-        background:rgba(0,0,0,0.5); justify-content:center; align-items:center;">
-        <div style="background:white; padding:20px; border-radius:10px; width:90%; max-width:500px;">
-            <h3>Adaugă Mașină</h3>
+    <div id="addCarModal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" id="closeModalBtn">&times;</span>
+            <h3>Adaugă / Editează Mașină</h3>
             <form id="addCarForm">
-                <input type="text" name="nume" placeholder="Model" required><br><br>
-                <input type="text" name="pret" placeholder="Preț/zi (€)" required><br><br>
-                <input type="text" name="motor" placeholder="Detalii Motor" required><br><br>
-                <input type="text" name="anul" placeholder="Anul fabricarii" required><br><br>
-                <input type="text" name="imagine" placeholder="URL imagine" required><br><br>
+                <input type="text" name="model" placeholder="Model" required><br><br>
+                <input type="text" name="pretPZ" placeholder="Preț/zi (€)" required><br><br>
+                <input type="text" name="detaliiMotor" placeholder="Detalii Motor" required><br><br>
+                <input type="text" name="anul" placeholder="Anul fabricării" required><br><br>
+                <input type="text" name="imagine" placeholder="Imagine (URL)" required><br><br>
                 <button type="submit">Salvează</button>
-                <button type="button" onclick="closeAddCarModal()">Anulează</button>
+                <button type="button" id="cancelModalBtn">Anulează</button>
             </form>
         </div>
     </div>
-    <script>
-        const isAdmin = true; // Setează pe false pentru utilizatori normali
 
-        window.onload = () => {
-            if (isAdmin) {
-                document.getElementById('admin-controls').style.display = 'block';
-            }
-            loadCars();
-        };
 
-        function openAddCarModal() {
-            document.getElementById('addCarModal').style.display = 'flex';
-        }
+    <!-- Modal Editare -->
+<div id="editCarModal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" id="closeEditModalBtn">&times;</span>
+        <h3>Editează Mașină</h3>
+        <form id="editCarForm">
+            <input type="text" name="model" placeholder="Model" required><br><br>
+            <input type="text" name="pretPZ" placeholder="Preț/zi (€)" required><br><br>
+            <input type="text" name="detaliiMotor" placeholder="Detalii Motor" required><br><br>
+            <input type="text" name="anul" placeholder="Anul fabricării" required><br><br>
+            <input type="text" name="imagine" placeholder="Imagine (URL)" required><br><br>
+            <button type="submit">Salvează Modificările</button>
+            <button type="button" id="cancelEditModalBtn">Anulează</button>
+        </form>
+    </div>
+</div>
 
-        function closeAddCarModal() {
-            document.getElementById('addCarModal').style.display = 'none';
-        }
+<script>
+    const user = JSON.parse(localStorage.getItem('user'));
+    const isAdmin = user && user.isAdmin;
+    let currentEditId = null;
 
-        function loadCars() {
-            fetch('http://localhost:3000/api/masini')
-                .then(res => res.json())
-                .then(cars => {
-                    const container = document.getElementById('carContainer');
-                    container.innerHTML = '';
-                    cars.forEach(car => {
-                        container.innerHTML += `
-                        <div class="car-box">
-                            <img src="${car.imagine || 'https://via.placeholder.com/150'}" alt="${car.model}">
-                            <h3>${car.model} (${car.anul})</h3>
-                            <p>${car.pretPZ}€/zi</p>
-                            <p>${car.detaliiMotor}</p>
-                        </div>`;
-                    });
+    function openAddCarModal() {
+        document.getElementById('addCarModal').style.display = 'flex';
+    }
+
+    function closeAddCarModal() {
+        document.getElementById('addCarModal').style.display = 'none';
+        document.getElementById('addCarForm').reset();
+        currentEditId = null;
+        document.getElementById('addCarForm').onsubmit = defaultSubmit; // ✅ Resetare la modul adăugare
+    }
+
+    function loadCars() {
+        fetch('http://localhost:3000/api/masini')
+            .then(res => res.json())
+            .then(cars => {
+                const container = document.getElementById('carContainer');
+                container.innerHTML = '';
+                cars.forEach(car => {
+                    container.innerHTML += `
+                    <div class="car-box">
+                        <img src="${car.imagine}" alt="${car.model}">
+                        <h3>${car.model} (${car.anul})</h3>
+                        <p>${car.pretPZ}€/zi</p>
+                        <p>${car.detaliiMotor}</p>
+                        ${isAdmin ? `
+                            <button onclick="editCar(${car.id})">Editează</button>
+                            <button onclick="deleteCar(${car.id})">Șterge</button>
+                        ` : `<button onclick="inchiriazaMasina('${car.model}')">Închiriază</button>`}
+                    </div>`;
+                });
+            })
+            .catch(err => console.error('Eroare la încărcare mașini:', err));
+    }
+
+    function inchiriazaMasina(model) {
+        alert(`Ai ales să închiriezi modelul: ${model}.`);
+    }
+
+    function editCar(id) {
+    fetch(`http://localhost:3000/api/masini`)
+        .then(res => res.json())
+        .then(cars => {
+            const car = cars.find(c => c.id === id);
+            if (!car) return alert('Mașina nu a fost găsită.');
+
+            const form = document.getElementById('editCarForm');
+            form.model.value = car.model;
+            form.pretPZ.value = car.pretPZ;
+            form.detaliiMotor.value = car.detaliiMotor;
+            form.anul.value = car.anul;
+            form.imagine.value = car.imagine;
+
+            currentEditId = id;
+
+            form.onsubmit = function (e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+
+                fetch(`http://localhost:3000/api/masini/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
                 })
-                .catch(err => console.error('Eroare la încărcare mașini:', err));
-        }
-
-        document.getElementById('addCarForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const data = {
-                model: formData.get('nume'),
-                pretPZ: parseFloat(formData.get('pret')),
-                detaliiMotor: formData.get('motor'),
-                anul: parseInt(formData.get('anul')),
-                imagine: formData.get('imagine')
+                    .then(res => {
+                        if (!res.ok) throw new Error('Eroare la actualizare');
+                        return res.json();
+                    })
+                    .then(() => {
+                        alert('Mașina a fost actualizată.');
+                        closeEditCarModal();
+                        loadCars();
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Eroare la actualizare.');
+                    });
             };
 
-            fetch('http://localhost:3000/api/masini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+            openEditCarModal();
+        });
+}
+
+
+    function deleteCar(id) {
+        if (confirm('Sigur vrei să ștergi această mașină?')) {
+            fetch(`http://localhost:3000/api/masini/${id}`, {
+                method: 'DELETE'
             })
                 .then(res => res.json())
-                .then(response => {
-                    alert('Mașina a fost adăugată!');
-                    closeAddCarModal();
+                .then(() => {
+                    alert('Mașina a fost ștearsă.');
                     loadCars();
                 })
                 .catch(err => {
                     console.error(err);
-                    alert('Eroare la salvare.');
+                    alert('Eroare la ștergere.');
                 });
-        });
-    </script>
+        }
+    }
+
+    const defaultSubmit = function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        fetch('http://localhost:3000/api/masini', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Eroare la salvare.');
+                return res.json();
+            })
+            .then(() => {
+                alert('Mașina a fost adăugată!');
+                closeAddCarModal();
+                loadCars();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Eroare la salvare.');
+            });
+    };
+
+    // deschidearea modalului de editare
+    function openEditCarModal() {
+    document.getElementById('editCarModal').style.display = 'flex';
+}
+
+function closeEditCarModal() {
+    document.getElementById('editCarModal').style.display = 'none';
+    document.getElementById('editCarForm').reset();
+    currentEditId = null;
+}
+
+    window.onload = () => {
+        if (isAdmin) {
+            document.getElementById('admin-controls').style.display = 'block';
+            document.getElementById('addCarForm').addEventListener('submit', defaultSubmit); // ✅ Adăugare default
+            document.getElementById('openModalBtn').addEventListener('click', openAddCarModal);
+            document.getElementById('closeModalBtn').addEventListener('click', closeAddCarModal);
+            document.getElementById('cancelModalBtn').addEventListener('click', closeAddCarModal);
+        }
+        loadCars();
+    };
+    window.onload = () => {
+    if (isAdmin) {
+        document.getElementById('admin-controls').style.display = 'block';
+        document.getElementById('addCarForm').addEventListener('submit', defaultSubmit);
+        document.getElementById('openModalBtn').addEventListener('click', openAddCarModal);
+        document.getElementById('closeModalBtn').addEventListener('click', closeAddCarModal);
+        document.getElementById('cancelModalBtn').addEventListener('click', closeAddCarModal);
+
+        // ✅ Mutate aici:
+        document.getElementById('closeEditModalBtn').addEventListener('click', closeEditCarModal);
+        document.getElementById('cancelEditModalBtn').addEventListener('click', closeEditCarModal);
+    }
+
+    loadCars();
+
+};
+    document.getElementById('closeModalBtn').addEventListener('click', closeAddCarModal);
+    document.getElementById('cancelModalBtn').addEventListener('click', closeAddCarModal);      
+
+    document.getElementById('closeEditModalBtn').addEventListener('click', closeEditCarModal);
+    document.getElementById('cancelEditModalBtn').addEventListener('click', closeEditCarModal);
+</script>
 
 </body>
 

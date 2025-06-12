@@ -233,3 +233,49 @@ nav ul li a {
         height: 100vh;
     }
 }
+
+.profile-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #ecf3fc;
+  padding: 10px 20px;
+  border-left: 5px solid #3371ae;
+  margin: 20px;
+  border-radius: 8px;
+  max-width: 300px;
+  gap: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 1rem;
+  color: #2c3e50;
+}
+
+.profile-wrapper strong {
+  color: #3371ae;
+}
+
+.logout-button {
+  background-color: #ecf3fc;
+  border: none;
+  color: rgb(181, 0, 0);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
+.profile-pic {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #4a90e2;
+  transition: transform 0.2s;
+}
+
+.profile-pic:hover {
+  transform: scale(1.05);
+}

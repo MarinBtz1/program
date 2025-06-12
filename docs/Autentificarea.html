@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="ro">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Autentificare</title>
   <link rel="stylesheet" href="Autentificare.css">
   <style>
@@ -13,6 +14,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
     <h2>Autentificare</h2>
@@ -29,6 +31,7 @@
     </form>
     <p class="link">Nu ai cont? <a href="Inregistrare.html">Înregistrează-te</a></p>
   </div>
+  <div id="generalError" style="color:red; margin-top:10px;"></div>
 
   <script>
     const form = document.getElementById('autentificareForm');
@@ -36,28 +39,66 @@
     const parola = document.getElementById('parola');
     const emailError = document.getElementById('emailError');
     const parolaError = document.getElementById('parolaError');
+    const generalError = document.getElementById('generalError');
 
-    form.addEventListener('submit', function (e) {
-      let valid = true;
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+
       emailError.textContent = '';
       parolaError.textContent = '';
+      generalError.textContent = '';
 
-      // Validare email
+      let valid = true;
+
       if (!email.value.includes('@') || !email.value.includes('.')) {
         emailError.textContent = 'Introduceți un email valid (ex: exemplu@email.com).';
         valid = false;
       }
 
-      // Validare parolă
       if (parola.value.length < 6) {
         parolaError.textContent = 'Parola trebuie să aibă cel puțin 6 caractere.';
         valid = false;
       }
 
-      if (!valid) {
-        e.preventDefault(); // oprește trimiterea formularului
+      if (!valid) return;
+
+      try {
+        const response = await fetch('http://localhost:3000/api/autentificare', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email.value,
+            parola: parola.value
+          })
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            generalError.textContent = 'Email sau parolă incorectă.';
+          } else {
+            generalError.textContent = 'Eroare server, încearcă din nou.';
+          }
+          return;
+        }
+
+        const data = await response.json();
+        localStorage.setItem('user', JSON.stringify(data));
+
+        // Redirecționare diferită pentru admin sau utilizator
+        if (data.isAdmin) {
+          window.location.href = 'admin.html';
+        } else {
+          window.location.href = 'index.html';
+        }
+
+      } catch (error) {
+        generalError.textContent = 'Eroare la comunicarea cu serverul.';
+        console.error(error);
       }
     });
   </script>
 </body>
+
 </html>

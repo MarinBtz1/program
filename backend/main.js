@@ -30,12 +30,45 @@ db.serialize(() => {
     FOREIGN KEY (id_client) REFERENCES User(id)
   )`);
 
-  db.run(`CREATE TABLE IF NOT EXISTS User(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nume TEXT,
-    email TEXT,
-    parola TEXT
-  )`);
+  // Creăm tabela și introducem contul admin dacă nu există deja
+db.run(`CREATE TABLE IF NOT EXISTS User (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nume TEXT,
+  email TEXT UNIQUE,
+  parola TEXT,
+  isAdmin INTEGER DEFAULT 0
+)`, () => {
+  const adminEmail = 'admin@gmail.com';
+  const adminParola = '101220';
+
+  db.get(`SELECT * FROM User WHERE email = ?`, [adminEmail], (err, row) => {
+    if (!row) {
+      db.run(`INSERT INTO User (nume, email, parola, isAdmin) VALUES (?, ?, ?, ?)`,
+        ['Admin', adminEmail, adminParola, 1]);
+    }
+  });
+});
+});
+
+// Ruta de autentificare
+app.post('/api/autentificare', (req, res) => {
+  const { email, parola } = req.body;
+
+  db.get(`SELECT * FROM User WHERE email = ? AND parola = ?`, [email, parola], (err, row) => {
+    if (err) return res.status(500).json({ mesaj: 'Eroare server' });
+    if (!row) return res.status(401).json({ mesaj: 'Email sau parolă incorectă' });
+
+    res.json({
+      id: row.id,
+      nume: row.nume,
+      email: row.email,
+      isAdmin: row.isAdmin === 1
+    });
+  });
+});
+
+app.listen(3000, () => {
+  console.log('Serverul rulează pe http://localhost:3000');
 });
 
 // ✅ Adăugare mașină
@@ -104,4 +137,4 @@ app.post('/api/inchiriere', (req, res) => {
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Serverul rulează pe http://localhost:${PORT}`);
-});
+}); 

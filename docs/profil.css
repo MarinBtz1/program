@@ -1,0 +1,68 @@
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.profile-image-wrapper {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.profile-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #4a90e2;
+  margin-bottom: 10px;
+}
+
+#uploadPoza {
+  display: block;
+  margin: auto;
+  color: #333;
+  font-size: 0.9rem;
+}
+.profile-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.profile-info h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 5px;
+}
+.profile-info p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+.profile-info p span {
+  font-weight: bold;
+  color: #4a90e2;
+}
+.profile-info p a {
+  color: #4a90e2;
+  text-decoration: none;
+}
+.profile-info p a:hover {
+  text-decoration: underline;
+}
+.profile-info p a:visited {
+  color: #3a7bd5;
+}
+.profile-info p a:active {
+  color: #2a5bb5;
+}
+.profile-info p a:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5);
+}
+.profile-info p a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5);
+}
+
+
+/* Restul stilurilor sunt moștenite din stilurile tale deja definite */

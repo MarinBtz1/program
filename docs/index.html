@@ -1,46 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Chirie Automobile</title>
-        <link rel="stylesheet" href="index.css">
-    </head>
-    <body>
-    <header>
-        <h1>Chirie Automobile</h1>      
-        <nav>
-            <ul>
-                <li><a href="index.html">Acasă</a></li>
-                <li><a href="DespreNoi.html">Despre Noi</a></li>
-                <li><a href="servicii.html">Servicii</a></li>
-                <li><a href="Autovehicule.html">Autovehicule</a></li>
-            </ul>
-        </nav>
-    </header>
-    <img src="Photo/111.jpg" class="background" alt="Fundal">
+<html lang="ro">
 
-    <div class="top-bar">
-        <div class="auth-links">
-            <a href="Autentificarea.html">Autentificare</a>
-            <a href="Inregistrare.html">Înregistrare</a>
-        </div>
-        <div class="language-selector">
-            <select>
-                <option value="ro">Română</option>
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-            </select>
-        </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chirie Automobile</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <header>
+    <h1>Chirie Automobile</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Acasă</a></li>
+        <li><a href="DespreNoi.html">Despre Noi</a></li>
+        <li><a href="servicii.html">Servicii</a></li>
+        <li><a href="Autovehicule.html">Autovehicule</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <img src="Photo/111.jpg" class="background" alt="Fundal">
+
+  <div class="top-bar">
+    <!-- Linkuri autentificare -->
+    <div class="auth-links" id="auth-links">
+      <a href="Autentificarea.html">Autentificare</a>
+      <a href="Inregistrare.html">Înregistrare</a>
     </div>
-<div class="down-bar">
+
+    <!-- Profil utilizator -->
+    <div class="profile-wrapper" id="profile" style="display: none;">
+      <!-- poza e clickabilă -->
+      <label for="uploadPic">
+        <img id="profilePic" src="default.png" alt="Poza profil" class="profile-pic" style="cursor:pointer;">
+      </label>
+
+      <!-- input-ul e ascuns -->
+      <input type="file" id="uploadPic" accept="image/*" style="display: none;">
+
+      <div style="flex: 1; margin-left: 10px;">
+        <span>Bun venit, <strong id="username"></strong>!</span>
+      </div>
+
+      <button id="logoutBtn" class="logout-button">Delogare</button>
+    </div>
+
+
+    <!-- Selectare limbă -->
+    <div class="language-selector">
+      <select>
+        <option value="ro">Română</option>
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="down-bar">
     <div class="social-media">
-        <a href="#"><img src="Photo/Facebook_f_logo_(2021).svg.png" alt="Facebook"></a>
-        <a href="#"><img src="Photo/Instagram_logo_2016.svg.webp" alt="Instagram"></a>
+      <a href="#"><img src="Photo/Facebook_f_logo_(2021).svg.png" alt="Facebook"></a>
+      <a href="#"><img src="Photo/Instagram_logo_2016.svg.webp" alt="Instagram"></a>
     </div>
-</div>
-    </body>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const authLinks = document.getElementById('auth-links');
+      const profile = document.getElementById('profile');
+      const usernameElem = document.getElementById('username');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      if (user && user.nume) {
+        authLinks.style.display = 'none';
+        usernameElem.textContent = user.nume;
+        profile.style.display = 'block';
+      } else {
+        authLinks.style.display = 'block';
+        profile.style.display = 'none';
+      }
+
+      logoutBtn.addEventListener('click', () => {
+        localStorage.removeItem('user');
+        window.location.reload();
+      });
+    });
+
+    // Funcție pentru a schimba limba
+    function changeLanguage(lang) {
+      // Aici poți adăuga logica pentru a schimba limba aplicației
+      console.log(`Limba schimbată în: ${lang}`);
+    }
+
+    document.querySelector('.language-selector select').addEventListener('change', (e) => {
+      changeLanguage(e.target.value);
+    });
+
+    // Funcție pentru a încărca mașinile
+    function loadCars() {
+      fetch('http://localhost:3000/api/masini')
+        .then(res => res.json())
+        .then(cars => {
+          const container = document.getElementById('carContainer');
+          container.innerHTML = '';
+          cars.forEach(car => {
+            container.innerHTML += `
+              <div class="car-box">
+                <img src="${car.imagine}" alt="${car.model}">
+                <h3>${car.model} (${car.anul})</h3>
+                <p>${car.pretPZ}€/zi</p>
+                <p>${car.detaliiMotor}</p>
+                <button onclick="inchiriazaMasina('${car.model}')">Închiriază</button>
+                </div>`;
+          });
+        })
+        .catch(err => console.error('Eroare la încărcare mașini:', err));
+    }
+  </script>
+  <script>
+    const storedImage = localStorage.getItem('profilePic');
+    if (storedImage) {
+      document.getElementById('profilePic').src = storedImage;
+    }
+
+    document.getElementById('uploadPic').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        const imageUrl = event.target.result;
+        document.getElementById('profilePic').src = imageUrl;
+        localStorage.setItem('profilePic', imageUrl);
+      };
+      reader.readAsDataURL(file);
+    });
+  </script>
+</body>
 
 </html>
-
-
